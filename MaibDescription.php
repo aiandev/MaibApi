@@ -1,6 +1,6 @@
 <?php
 
-namespace Fruitware\MaibApi;
+namespace AianDev\MaibApi;
 
 use GuzzleHttp\Command\Guzzle\Description;
 
@@ -22,42 +22,42 @@ class MaibDescription extends Description {
 					'parameters'    => [
 						'command'        => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 						],
 						'amount'         => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 							'max'       => 12,
 						],
 						'currency'       => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 							'max'       => 3,
 						],
 						'client_ip_addr' => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 							'max'      => 15,
 						],
 						'description'    => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => false,
 							'max'      => 125,
 						],
 						'language'       => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => false,
 							'max'      => 32,
 						],
 						'msg_type'    => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => false,
 							'max'      => 3,
 						],
@@ -71,43 +71,43 @@ class MaibDescription extends Description {
 					'parameters'    => [
 						'command'        => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 						],
 						'amount'         => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 							'max'      => 12,
 						],
 						'currency'       => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 							'max'      => 3,
 						],
 						'client_ip_addr' => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 							'max'      => 15,
 
 						],
 						'description'    => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => false,
 							'max'      => 125,
 						],
 						'language'       => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => false,
 							'max'      => 32,
 						],
 						'msg_type'    => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => false,
 							'max'      => 3,
 						],
@@ -121,48 +121,48 @@ class MaibDescription extends Description {
 					'parameters'    => [
 						'command'        => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 						],
 						'trans_id'        => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 						],
 						'amount'         => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 							'max'      => 12,
 						],
 						'currency'       => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 							'max'      => 3,
 						],
 						'client_ip_addr' => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 							'max'      => 15,
 
 						],
 						'description'    => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => false,
 							'max'      => 125,
 						],
 						'language'       => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => false,
 							'max'      => 32,
 						],
 						'msg_type'    => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => false,
 							'max'      => 3,
 						],
@@ -176,17 +176,17 @@ class MaibDescription extends Description {
 					'parameters'    => [
 						'command'        => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 						],
 						'trans_id'       => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 						],
 						'client_ip_addr' => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 							'max'      => 15,
 
@@ -201,17 +201,41 @@ class MaibDescription extends Description {
 					'parameters'    => [
 						'command'  => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 						],
 						'trans_id' => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 						],
-						'amount '  => [
+						'amount'  => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
+							'required' => false,
+							'max'      => 12,
+						],
+					]
+				],
+				'refundTransaction'        => [
+					'httpMethod'    => 'POST',
+					'uri'           => '/ecomm2/MerchantHandler',
+					'description'   => 'identifies the request for refund transaction',
+					'responseModel' => 'getResponse',
+					'parameters'    => [
+						'command'  => [
+							'type'     => 'string',
+							'location' => 'formParam',
+							'required' => true,
+						],
+						'trans_id' => [
+							'type'     => 'string',
+							'location' => 'formParam',
+							'required' => true,
+						],
+						'amount'  => [
+							'type'     => 'string',
+							'location' => 'formParam',
 							'required' => false,
 							'max'      => 12,
 						],
@@ -225,7 +249,7 @@ class MaibDescription extends Description {
 					'parameters'    => [
 						'command' => [
 							'type'     => 'string',
-							'location' => 'postField',
+							'location' => 'formParam',
 							'required' => true,
 						],
 					]

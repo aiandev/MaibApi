@@ -1,18 +1,57 @@
 <?php
 
-namespace Fruitware\MaibApi;
+namespace AianDev\MaibApi;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Command\Guzzle\DescriptionInterface;
 use GuzzleHttp\Command\Guzzle\GuzzleClient;
-use GuzzleHttp\Event\CompleteEvent;
 use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Message\Response;
-use GuzzleHttp\Stream\Stream;
 
 class MaibClient extends GuzzleClient
 {
+
+	#region Constants
+	const MOD_ID             = 'moldovaagroindbank';
+	const MOD_TITLE          = 'Moldova Agroindbank';
+	const MOD_PREFIX         = 'maib_';
+
+	const TRANSACTION_TYPE_CHARGE = 'charge';
+	const TRANSACTION_TYPE_AUTHORIZATION = 'authorization';
+
+	const LOGO_TYPE_BANK       = 'bank';
+	const LOGO_TYPE_SYSTEMS    = 'systems';
+
+	const MOD_TRANSACTION_TYPE = self::MOD_PREFIX . 'transaction_type';
+	const MOD_TRANSACTION_ID   = self::MOD_PREFIX . 'transaction_id';
+	const MOD_CLOSEDAY_ACTION  = self::MOD_PREFIX . 'close_day';
+
+	const SUPPORTED_CURRENCIES = [
+		'EUR' => 978,
+		'USD' => 840,
+		'MDL' => 498
+	];
+
+	const MAIB_TRANS_ID        		= 'trans_id';
+	const MAIB_TRANSACTION_ID  		= 'TRANSACTION_ID';
+
+	const MAIB_RESULT               = 'RESULT';
+	const MAIB_RESULT_OK            = 'OK'; //successfully completed transaction
+	const MAIB_RESULT_FAILED        = 'FAILED'; //transaction has failed
+	const MAIB_RESULT_CREATED       = 'CREATED'; //transaction just registered in the system
+	const MAIB_RESULT_PENDING       = 'PENDING'; //transaction is not accomplished yet
+	const MAIB_RESULT_DECLINED      = 'DECLINED'; //transaction declined by ECOMM, because ECI is in blocked ECI list (ECOMM server side configuration)
+	const MAIB_RESULT_REVERSED      = 'REVERSED'; //transaction is reversed
+	const MAIB_RESULT_AUTOREVERSED  = 'AUTOREVERSED'; //transaction is reversed by autoreversal
+	const MAIB_RESULT_TIMEOUT       = 'TIMEOUT'; //transaction was timed out
+
+	const MAIB_RESULT_CODE          = 'RESULT_CODE';
+	const MAIB_RESULT_3DSECURE      = '3DSECURE';
+	const MAIB_RESULT_RRN           = 'RRN';
+	const MAIB_RESULT_APPROVAL_CODE = 'APPROVAL_CODE';
+	const MAIB_RESULT_CARD_NUMBER   = 'CARD_NUMBER';
+	#endregion
+	
 	/**
 	 * @param ClientInterface      $client
 	 * @param DescriptionInterface $description
@@ -22,25 +61,7 @@ class MaibClient extends GuzzleClient
 	{
 		$client = $client instanceof ClientInterface ? $client : new Client();
 		$description = $description instanceof DescriptionInterface ? $description : new MaibDescription();
-		parent::__construct($client, $description, $config);
-
-		$cachedResponse = new Response(200);
-
-		$this->getHttpClient()->getEmitter()->on(
-			'complete',
-			function (CompleteEvent $e) use ($cachedResponse) {
-				$array1 = explode(PHP_EOL, trim((string)$e->getResponse()->getBody()));
-				$result = array();
-				foreach($array1 as $key => $value) {
-					$array2 = explode(':', $value);
-					$result[$array2[0]] = isset($array2[1])? trim( $array2[1] ) : '';
-				}
-
-                		$stream = Stream::factory(json_encode($result));
-                		$cachedResponse->setBody($stream);
-                		$e->intercept($cachedResponse);
-			}
-		);
+		parent::__construct($client, $description, null, null, null, $config);
 	}
 
     /**
@@ -56,7 +77,13 @@ class MaibClient extends GuzzleClient
         try {
             $response = parent::__call($name, $arguments);
 
-            return json_decode($response['additionalProperties'], true);
+            $array1 = explode(PHP_EOL, trim((string)$response->offsetGet('additionalProperties')));
+            $result = array();
+            foreach($array1 as $value) {
+              $array2 = explode(':', $value);
+              $result[$array2[0]] = isset($array2[1])? trim( $array2[1] ) : '';
+            }
+            return $result;
         }
         catch (\Exception $ex) {
             throw $ex;
@@ -66,7 +93,7 @@ class MaibClient extends GuzzleClient
 	/**
 	 * Registering transactions
 	 * @param  float $amount
-	 * @param  int $currency
+	 * @param  string $currency
 	 * @param  string $clientIpAddr
 	 * @param  string $description
 	 * @param  string $language
@@ -75,13 +102,13 @@ class MaibClient extends GuzzleClient
 	 * TRANSACTION_ID - transaction identifier (28 characters in base64 encoding)
 	 * error          - in case of an error
 	 */
-	public function registerSmsTransaction($amount, $currency, $clientIpAddr, $description = '', $language = 'ru')
+	public function registerSmsTransaction(int $amount, string $currency, string $clientIpAddr, string $description = '', string $language = 'ro')
 	{
 		$args = [
 			'command'  => 'v',
 			'amount' => (string)($amount * 100),
 			'msg_type' => 'SMS',
-			'currency' => (string)$currency,
+			'currency' => (string)self::SUPPORTED_CURRENCIES[$currency],
 			'client_ip_addr' => $clientIpAddr,
 			'description' => $description,
 			'language' => $language
@@ -93,7 +120,7 @@ class MaibClient extends GuzzleClient
 	/**
 	 * Registering DMS authorization
 	 * 	 * @param  float $amount
-	 * 	 * @param  int $currency
+	 * 	 * @param  string $currency
 	 * 	 * @param  string $clientIpAddr
 	 * 	 * @param  string $description
 	 * 	 * @param  string $language
@@ -102,7 +129,7 @@ class MaibClient extends GuzzleClient
 	 * TRANSACTION_ID - transaction identifier (28 characters in base64 encoding)
 	 * error          - in case of an error
 	 */
-	public function registerDmsAuthorization($amount, $currency, $clientIpAddr, $description = '', $language = 'ru')
+	public function registerDmsAuthorization(int $amount, string $currency, $clientIpAddr, $description = '', $language = 'ro')
 	{
 		$args = [
 			'command'  => 'a',
@@ -121,7 +148,7 @@ class MaibClient extends GuzzleClient
 	 * Executing a DMS transaction
 	 * @param  string $authId
 	 * @param  float $amount
-	 * @param  int $currency
+	 * @param  string $currency
 	 * @param  string $clientIpAddr
 	 * @param  string $description
 	 * @param  string $language
@@ -139,7 +166,7 @@ class MaibClient extends GuzzleClient
 			'command'  => 't',
 			'trans_id' => $authId,
 			'amount' => (string)($amount * 100),
-			'currency' => (string)$currency,
+			'currency' => (string)self::SUPPORTED_CURRENCIES[$currency],
 			'client_ip_addr' => $clientIpAddr,
 			'msg_type' => 'DMS',
 			'description' => $description,
@@ -188,7 +215,7 @@ class MaibClient extends GuzzleClient
 	 * error                   - In case of an error
 	 * warning                 - In case of warning (reserved for future use).
 	 */
-	public function getTransactionResult($transId, $clientIpAddr)
+	public function getTransactionResult(string $transId, $clientIpAddr)
 	{
 		$args = [
 			'command'  => 'c',
@@ -217,10 +244,35 @@ class MaibClient extends GuzzleClient
 		$args = array(
 			'command'  => 'r',
 			'trans_id' => $transId,
-			'amount' => $amount,
+			'amount' => (string)($amount * 100),
 		);
 
 		return parent::revertTransaction($args);
+	}
+
+	/**
+	 * Transaction refund
+	 * @param  string $transId
+	 * @param  string $amount          full original transaction amount is always refunded.
+	 * @return array  RESULT, RESULT_CODE
+	 * RESULT         - OK              - successful refund transaction
+	 * 		    FAILED          - failed refund transaction
+	 * RESULT_CODE    - result code returned from Card Suite Processing RTPS (3 digits)
+	 * refund_transaction_id - refund transaction identifier for obtaining refund payment details
+	 * error          - In case of an error
+	 * warning        - In case of warning (reserved for future use).
+	 *
+	 * Transaction status in payment server after refund is not changed.
+	 */
+	public function refundTransaction($transId, $amount)
+	{
+		$args = array(
+			'command'  => 'k',
+			'trans_id' => $transId,
+			'amount' => (string)($amount * 100),
+		);
+
+		return parent::refundTransaction($args);
 	}
 
 	/**
